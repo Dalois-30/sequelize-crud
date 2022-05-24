@@ -3,6 +3,7 @@ const validateRequest = require('middleware/validate-request');
 const Role = require('_helpers/role');
 const bcrypt = require('bcrypt');
 const db = require('_helpers/db');
+const jwt = require('jsonwebtoken');
 
 exports.getAll = (req, res, next) => {
     _getAll()
@@ -24,12 +25,12 @@ exports.signup = (req, res, next) => {
 }
 
 exports.login = (req, res, next) => {
-    db.User.findOne({ email: req.body.email })
+    db.User.findOne({ where: { email: req.body.email } })
       .then(user => {
         if (!user) {
           return res.status(401).json({ error: 'Utilisateur non trouvé !' });
         }
-        bcrypt.compare(req.body.password, user.password)
+        bcrypt.compare(req.body.password, user.passwordHash)
           .then(valid => {
             if (!valid) {
               return res.status(401).json({ error: 'Mot de passe incorrect !' });
